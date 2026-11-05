@@ -158,7 +158,7 @@ build-%: generate ## Build binary for the specified arch
 provider-replaces.check: ## Ensure cross-provider dependencies use local replacements
 	@./hack/check-provider-replaces.sh
 
-lint: golangci-lint provider-replaces.check ## Run golangci-lint (set LINT_TARGET to run on specific module, LINT_JOBS for parallel jobs)
+lint: golangci-lint provider-replaces.check bare-http-transport.check ## Run golangci-lint (set LINT_TARGET to run on specific module, LINT_JOBS for parallel jobs)
 	@if [ -n "$(LINT_TARGET)" ]; then \
 		$(INFO) Running golangci-lint on $(LINT_TARGET); \
 		(cd $(LINT_TARGET) && $(GOLANGCI_LINT) run ./...) || exit 1; \
@@ -193,6 +193,11 @@ lint: golangci-lint provider-replaces.check ## Run golangci-lint (set LINT_TARGE
 		fi; \
 		$(OK) Finished linting all modules; \
 	fi
+
+.PHONY: bare-http-transport.check
+bare-http-transport.check: ## Forbid bare http.Transport literals that bypass HTTP proxy env
+	@./hack/check-bare-http-transport.sh
+	@$(OK) bare http.Transport check
 
 generate: controller-gen ## Generate code and crds
 	@CONTROLLER_GEN=$(CONTROLLER_GEN) ./hack/crd.generate.sh $(BUNDLE_DIR) $(CRD_DIR)
