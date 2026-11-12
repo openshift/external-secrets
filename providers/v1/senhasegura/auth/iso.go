@@ -19,7 +19,6 @@ package auth
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io"
@@ -31,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	esv1 "github.com/external-secrets/external-secrets/apis/externalsecrets/v1"
+	"github.com/external-secrets/external-secrets/runtime/esutils"
 	"github.com/external-secrets/external-secrets/runtime/esutils/resolvers"
 )
 
@@ -123,10 +123,12 @@ func (s *SenhaseguraIsoSession) GetIsoToken(clientID, clientSecret, systemURL st
 	u, _ := url.ParseRequestURI(systemURL)
 	u.Path = "/iso/oauth2/token"
 
-	tr := &http.Transport{
-		//nolint
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: ignoreSslCertificate},
+	tr, err := esutils.CloneDefaultHTTPTransport()
+	if err != nil {
+		return "", err
 	}
+	//nolint
+	tr.TLSClientConfig.InsecureSkipVerify = ignoreSslCertificate
 
 	client := &http.Client{Transport: tr}
 

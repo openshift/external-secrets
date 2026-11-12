@@ -21,7 +21,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,6 +30,8 @@ import (
 	"time"
 
 	aesdecrypt "github.com/Onboardbase/go-cryptojs-aes-decrypt/decrypt"
+
+	"github.com/external-secrets/external-secrets/runtime/esutils"
 )
 
 const (
@@ -147,13 +148,11 @@ type SecretsResponse struct {
 // NewOnboardbaseClient creates a new client for interacting with Onboardbase API.
 // It requires an API key and passcode for authentication.
 func NewOnboardbaseClient(onboardbaseAPIKey, onboardbasePasscode string) (*OnboardbaseClient, error) {
-	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
+	httpTransport, err := esutils.CloneDefaultHTTPTransport()
+	if err != nil {
+		return nil, err
 	}
-	httpTransport := &http.Transport{
-		DisableKeepAlives: true,
-		TLSClientConfig:   tlsConfig,
-	}
+	httpTransport.DisableKeepAlives = true
 	client := &OnboardbaseClient{
 		OnboardbaseAPIKey:   onboardbaseAPIKey,
 		OnboardbasePassCode: onboardbasePasscode,

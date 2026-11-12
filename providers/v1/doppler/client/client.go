@@ -19,7 +19,6 @@ package client
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,6 +26,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/external-secrets/external-secrets/runtime/esutils"
 )
 
 const contentTypeHeader = "content-type"
@@ -321,18 +322,15 @@ func (c *DopplerClient) performRequest(path, method string, headers headers, par
 
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
-	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
+	transport, err := esutils.CloneDefaultHTTPTransport()
+	if err != nil {
+		return nil, newErr(0, err, "unable to configure http transport")
 	}
-
+	transport.DisableKeepAlives = true
 	if !c.VerifyTLS {
-		tlsConfig.InsecureSkipVerify = true
+		transport.TLSClientConfig.InsecureSkipVerify = true
 	}
-
-	httpClient.Transport = &http.Transport{
-		DisableKeepAlives: true,
-		TLSClientConfig:   tlsConfig,
-	}
+	httpClient.Transport = transport
 
 	r, err := httpClient.Do(req)
 	if err != nil {
