@@ -41,8 +41,8 @@ func init() {
 	// See https://pkg.go.dev/crypto/tls#CurveID for curve names.
 	for _, c := range []tls.CurveID{
 		tls.CurveP256, tls.CurveP384, tls.CurveP521, tls.X25519,
+		// tls.MLKEM1024 requires go1.27+; omit while this branch is on go1.26.
 		tls.X25519MLKEM768, tls.SecP256r1MLKEM768, tls.SecP384r1MLKEM1024,
-		tls.MLKEM1024,
 	} {
 		curveNames[c.String()] = c
 		curveNames[strconv.FormatUint(uint64(c), 10)] = c

@@ -115,16 +115,6 @@ func TestParseCurvePreferences(t *testing.T) {
 			input: []string{"SecP384r1MLKEM1024"},
 			want:  []tls.CurveID{tls.SecP384r1MLKEM1024},
 		},
-		{
-			name:  "MLKEM1024 by name",
-			input: []string{"MLKEM1024"},
-			want:  []tls.CurveID{tls.MLKEM1024},
-		},
-		{
-			name:  "MLKEM1024 by decimal ID",
-			input: []string{"514"},
-			want:  []tls.CurveID{tls.MLKEM1024},
-		},
 	}
 
 	for _, tt := range tests {
